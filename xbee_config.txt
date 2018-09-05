@@ -1,0 +1,13 @@
+coordinator 0
+CH D
+ID 1331
+Random Delay Slots 1
+CE coordinator1
+BD 57600
+RO 5
+AP API2
+
+end device
+MY
+CE end device
+AP 0
