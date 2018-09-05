@@ -1,4 +1,4 @@
-//Lidar + ROS Publisher + servo, work!
+ //Lidar + ROS Publisher + servo, work!
 #include <ros.h>
 #include <sensor_msgs/LaserScan.h>
 #include <Wire.h>
@@ -8,10 +8,12 @@
 LIDARLite myLidarLite;
 Servo myservo;
 
-// variable to store the servo position
-int pos = 40;  
-const int num_readings = 4;
+const int degree_increment = 2; //degree
+const int measureTime_increment = degree_increment * 10; //ms
+const int num_readings = 160/degree_increment;
 const double pi = 3.141592;
+// variable to store the servo position
+int pos = degree_increment; 
 
 //ROS node handle
 ros::NodeHandle  nh;
@@ -36,11 +38,11 @@ void setup()
   nh.initNode();
   nh.advertise(scan_pub);
   
-  scan.angle_min = 40.0*pi/180.0;//2 degree
+  scan.angle_min = degree_increment*pi/180.0;//2 degree
   scan.angle_max = 160.0*pi/180.0;//160 degree
-  scan.angle_increment = 40.0*pi/180.0;
-  scan.time_increment = 0.4;
-  scan.scan_time = 1.6;
+  scan.angle_increment = degree_increment*pi/180.0;
+  scan.time_increment = measureTime_increment/1000.0;
+  scan.scan_time = num_readings*measureTime_increment/1000.0;
   scan.range_min = 0.01;
   scan.range_max = 40.0;
   scan.ranges_length = num_readings;
@@ -50,24 +52,28 @@ void loop()
 {
   scan.header.stamp = nh.now();
   scan.header.frame_id = frameid;
+  
   // goes from 2 degrees to 160 degrees
   // in steps of 2 degree
-  for(pos = 40; pos <= num_readings*40; pos += 40)
+  for(pos = degree_increment; pos <= 160; pos += degree_increment)
   {  
       myservo.write(pos);   
-      delay(400);                    
-      ranges[pos/40-1] = myLidarLite.distance()/100.0;
+      delay(measureTime_increment);                    
+      ranges[pos/degree_increment-1] = myLidarLite.distance()/100.0;
       nh.spinOnce(); 
   }  
   scan.ranges = ranges;
   scan_pub.publish(&scan);
+  
+  nh.spinOnce(); 
+  
   // goes from 160 degrees to 2 degrees
   // in steps of 2 degree
-  for(pos = 160; pos > 0; pos -= 40)
+  for(pos = 160; pos > 0; pos -= degree_increment)
   {   
       myservo.write(pos);          
-      delay(400);                    
-      ranges[pos/40-1] = myLidarLite.distance()/100.0;
+      delay(measureTime_increment);                    
+      ranges[pos/degree_increment-1] = myLidarLite.distance()/100.0;
       nh.spinOnce(); 
   }
   scan.ranges = ranges;
