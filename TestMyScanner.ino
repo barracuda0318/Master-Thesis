@@ -8,7 +8,7 @@
 LIDARLite myLidarLite;
 Servo myservo;
 
-const int degree_increment = 2; //degree
+const int degree_increment = 16; //degree
 const int measureTime_increment = degree_increment * 10; //ms
 const int num_readings = 160/degree_increment;
 const double pi = 3.141592;
